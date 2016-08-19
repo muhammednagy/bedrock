@@ -9,7 +9,7 @@ from pages.firefox.base import FirefoxBasePage, FirefoxBaseRegion
 
 class TVPage(FirefoxBasePage):
 
-    URL_TEMPLATE = '/{locale}/firefox/os/devices/tv'
+    URL_TEMPLATE = '/{locale}/firefox/os/devices/tv/'
 
     _next_button_locator = (By.CSS_SELECTOR, '.pager-next')
     _previous_button_locator = (By.CSS_SELECTOR, '.pager-prev')

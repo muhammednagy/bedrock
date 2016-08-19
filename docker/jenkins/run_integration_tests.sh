@@ -22,7 +22,7 @@ if [ "${DRIVER}" = "Remote" ]; then
   # Waits until all nodes are ready and then runs tests against a local
   # bedrock instance.
 
-  SELENIUM_VERSION=${SELENIUM_VERSION:-2.48.2}
+  SELENIUM_VERSION=${SELENIUM_VERSION:-"3.0.1-dysprosium"}
 
   docker pull selenium/hub:${SELENIUM_VERSION}
   docker pull selenium/node-firefox:${SELENIUM_VERSION}

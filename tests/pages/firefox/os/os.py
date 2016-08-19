@@ -9,7 +9,7 @@ from pages.firefox.base import FirefoxBasePage
 
 class FirefoxOSPage(FirefoxBasePage):
 
-    URL_TEMPLATE = '/{locale}/firefox/os'
+    URL_TEMPLATE = '/{locale}/firefox/os/'
 
     _primary_download_locator = (By.CSS_SELECTOR, '.hero-content .cta-button')
     _secondary_download_locator = (By.CSS_SELECTOR, '.fxos-try .cta-button')
