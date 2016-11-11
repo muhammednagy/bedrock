@@ -230,9 +230,11 @@ describe('stub-attribution.js', function() {
         var sha1Url = 'https://download-sha1.allizom.org/?product=firefox-stub&os=win&lang=en-US';
         var winUrl = 'https://download.mozilla.org/?product=firefox-stub&os=win&lang=en-US';
         var win64Url = 'https://download.mozilla.org/?product=firefox-50.0b11-SSL&os=win64&lang=en-US';
+        var transitionalUrl = '/firefox/new/?scene=2';
 
         beforeEach(function() {
             var downloadMarkup = '<ul class="download-list">' +
+                                    '<li><a class="download-link" data-download-version="win" href="' + transitionalUrl +'">Download</a></li>' +
                                     '<li><a class="download-link" data-download-version="winsha1" href="' + sha1Url +'">Download</a></li>' +
                                     '<li><a class="download-link" data-download-version="win" href="' + winUrl+ '">Download</a></li>' +
                                     '<li><a class="download-link" data-download-version="win64" href="' + win64Url + '">Download</a></li>' +

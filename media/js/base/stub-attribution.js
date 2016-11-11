@@ -89,12 +89,17 @@ if (typeof Mozilla === 'undefined') {
             return;
         }
 
-        $('.download-link[href*="https://download.mozilla.org/"]').each(function() {
-            var version = $(this).data('downloadVersion');
-            // currently only Windows 32bit uses stub installer, but this could change
-            // in the future so we'll make that bet now.
-            if (version && (version === 'win' || version === 'win64')) {
-                this.href = Mozilla.StubAttribution.appendToDownloadURL(this.href, data);
+        $('.download-list .download-link').each(function() {
+            var version;
+            // If this is a transitional download link do nothing.
+            if (this.href && this.href.indexOf('/firefox/new/?scene=2') === -1) {
+
+                version = $(this).data('downloadVersion');
+                // Currently only Windows 32bit uses the stub installer, but this could
+                // easily change in the future so we'll make that bet now.
+                if (version && (version === 'win' || version === 'win64')) {
+                    this.href = Mozilla.StubAttribution.appendToDownloadURL(this.href, data);
+                }
             }
         });
     };
