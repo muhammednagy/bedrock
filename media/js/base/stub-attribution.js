@@ -15,7 +15,7 @@ if (typeof Mozilla === 'undefined') {
      * for relay to the Firefox stub installer. Data is first signed and encoded via
      * an XHR request to the `stub_attribution_code` service, before being appended
      * to Bouncer download URLs as query parameters. Data returned from the service
-     * is also stored in a session cookie to save multiple requests when navigating
+     * is also stored in a cookie to save multiple requests when navigating
      * pages. Bug https://bugzilla.mozilla.org/show_bug.cgi?id=1279291
      */
     var StubAttribution = {};
@@ -41,32 +41,37 @@ if (typeof Mozilla === 'undefined') {
     };
 
     /**
-     * Returns true if both session cookies exist.
+     * Returns true if both cookies exist.
      * @return {Boolean} data.
      */
-    StubAttribution.hasSessionCookie = function() {
+    StubAttribution.hasCookie = function() {
         return Mozilla.Cookies.hasItem(StubAttribution.COOKIE_CODE_ID) && Mozilla.Cookies.hasItem(StubAttribution.COOKIE_SIGNATURE_ID);
     };
 
     /**
-     * Stores a session cookie with stub attribution data values.
+     * Stores a cookie with stub attribution data values.
      * @param {Object} data - attribution_code, attribution_sig.
      */
-    StubAttribution.setSessionCookie = function(data) {
+    StubAttribution.setCookie = function(data) {
 
         if (!data.attribution_code || !data.attribution_sig) {
             return;
         }
 
-        Mozilla.Cookies.setItem(StubAttribution.COOKIE_CODE_ID, data.attribution_code, null, '/');
-        Mozilla.Cookies.setItem(StubAttribution.COOKIE_SIGNATURE_ID, data.attribution_sig, null, '/');
+        // set cookie to expire in 24 hours
+        var date = new Date();
+        date.setTime(date.getTime() + (1 * 24 * 60 * 60 * 1000));
+        var expires = date.toUTCString();
+
+        Mozilla.Cookies.setItem(StubAttribution.COOKIE_CODE_ID, data.attribution_code, expires, '/');
+        Mozilla.Cookies.setItem(StubAttribution.COOKIE_SIGNATURE_ID, data.attribution_sig, expires, '/');
     };
 
     /**
-     * Gets stub attribution data from session cookie.
+     * Gets stub attribution data from cookie.
      * @return {Object} - attribution_code, attribution_sig.
      */
-    StubAttribution.getSessionCookie = function() {
+    StubAttribution.getCookie = function() {
         return {
             /* eslint-disable camelcase */
             attribution_code: Mozilla.Cookies.getItem(StubAttribution.COOKIE_CODE_ID),
@@ -135,8 +140,8 @@ if (typeof Mozilla === 'undefined') {
         if (data.attribution_code && data.attribution_sig) {
             // Update download links on the current page.
             StubAttribution.updateBouncerLinks(data);
-            // Store attribution data in a session cookie should the user navigate.
-            StubAttribution.setSessionCookie(data);
+            // Store attribution data in a cookie should the user navigate.
+            StubAttribution.setCookie(data);
         }
     };
 
@@ -200,6 +205,14 @@ if (typeof Mozilla === 'undefined') {
      */
     StubAttribution.meetsRequirements = function() {
 
+        if (typeof window.site === 'undefined' || typeof Mozilla.Cookies === 'undefined') {
+            return false;
+        }
+
+        if (!Mozilla.Cookies.enabled()) {
+            return false;
+        }
+
         if (window.site.platform !== 'windows') {
             return false;
         }
@@ -226,12 +239,12 @@ if (typeof Mozilla === 'undefined') {
         }
 
         /**
-         * If session cookie already exists, update download links on the page,
+         * If cookie already exists, update download links on the page,
          * else make a request to the service if within attribution rate.
          */
-        if (StubAttribution.hasSessionCookie()) {
+        if (StubAttribution.hasCookie()) {
 
-            data = StubAttribution.getSessionCookie();
+            data = StubAttribution.getCookie();
             StubAttribution.updateBouncerLinks(data);
 
         // As long as the user is not already on scene2 of the main download page,

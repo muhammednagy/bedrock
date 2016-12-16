@@ -13,6 +13,7 @@ describe('stub-attribution.js', function() {
     beforeEach(function() {
         // stub out Mozilla.Cookie lib
         window.Mozilla.Cookies = sinon.stub();
+        window.Mozilla.Cookies.enabled = sinon.stub().returns(true);
         window.Mozilla.Cookies.setItem = sinon.stub();
         window.Mozilla.Cookies.getItem = sinon.stub();
         window.Mozilla.Cookies.hasItem = sinon.stub();
@@ -46,8 +47,8 @@ describe('stub-attribution.js', function() {
             /* eslint-enable camelcase */
             spyOn(Mozilla.StubAttribution, 'withinAttributionRate').and.returnValue(true);
             spyOn(Mozilla.StubAttribution, 'meetsRequirements').and.returnValue(true);
-            spyOn(Mozilla.StubAttribution, 'hasSessionCookie').and.returnValue(true);
-            spyOn(Mozilla.StubAttribution, 'getSessionCookie').and.returnValue(cookieData);
+            spyOn(Mozilla.StubAttribution, 'hasCookie').and.returnValue(true);
+            spyOn(Mozilla.StubAttribution, 'getCookie').and.returnValue(cookieData);
             Mozilla.StubAttribution.init();
             expect(Mozilla.StubAttribution.requestAuthentication).not.toHaveBeenCalled();
             expect(Mozilla.StubAttribution.updateBouncerLinks).toHaveBeenCalledWith(cookieData);
@@ -56,7 +57,7 @@ describe('stub-attribution.js', function() {
         it('should authenticate attribution data if none exists', function() {
             spyOn(Mozilla.StubAttribution, 'withinAttributionRate').and.returnValue(true);
             spyOn(Mozilla.StubAttribution, 'meetsRequirements').and.returnValue(true);
-            spyOn(Mozilla.StubAttribution, 'hasSessionCookie').and.returnValue(false);
+            spyOn(Mozilla.StubAttribution, 'hasCookie').and.returnValue(false);
             spyOn(Mozilla.StubAttribution, 'isFirefoxNewScene2').and.returnValue(false);
             spyOn(Mozilla.StubAttribution, 'getAttributionData').and.returnValue(data);
             Mozilla.StubAttribution.init();
@@ -67,7 +68,7 @@ describe('stub-attribution.js', function() {
         it('should do nothing if stub attribution requirements are not satisfied', function() {
             spyOn(Mozilla.StubAttribution, 'withinAttributionRate').and.returnValue(true);
             spyOn(Mozilla.StubAttribution, 'meetsRequirements').and.returnValue(false);
-            spyOn(Mozilla.StubAttribution, 'hasSessionCookie').and.returnValue(false);
+            spyOn(Mozilla.StubAttribution, 'hasCookie').and.returnValue(false);
             spyOn(Mozilla.StubAttribution, 'isFirefoxNewScene2').and.returnValue(false);
             spyOn(Mozilla.StubAttribution, 'getAttributionData').and.returnValue(data);
             Mozilla.StubAttribution.init();
@@ -78,7 +79,7 @@ describe('stub-attribution.js', function() {
         it('should do nothing if session is not within sample rate', function() {
             spyOn(Mozilla.StubAttribution, 'withinAttributionRate').and.returnValue(false);
             spyOn(Mozilla.StubAttribution, 'meetsRequirements').and.returnValue(true);
-            spyOn(Mozilla.StubAttribution, 'hasSessionCookie').and.returnValue(false);
+            spyOn(Mozilla.StubAttribution, 'hasCookie').and.returnValue(false);
             spyOn(Mozilla.StubAttribution, 'isFirefoxNewScene2').and.returnValue(false);
             spyOn(Mozilla.StubAttribution, 'getAttributionData').and.returnValue(data);
             Mozilla.StubAttribution.init();
@@ -89,7 +90,7 @@ describe('stub-attribution.js', function() {
         it('should do nothing if page is scene2 of /firefox/new/', function() {
             spyOn(Mozilla.StubAttribution, 'withinAttributionRate').and.returnValue(true);
             spyOn(Mozilla.StubAttribution, 'meetsRequirements').and.returnValue(true);
-            spyOn(Mozilla.StubAttribution, 'hasSessionCookie').and.returnValue(false);
+            spyOn(Mozilla.StubAttribution, 'hasCookie').and.returnValue(false);
             spyOn(Mozilla.StubAttribution, 'isFirefoxNewScene2').and.returnValue(true);
             spyOn(Mozilla.StubAttribution, 'getAttributionData').and.returnValue(data);
             Mozilla.StubAttribution.init();
@@ -102,6 +103,11 @@ describe('stub-attribution.js', function() {
 
         afterEach(function() {
             window.site.platform = 'other';
+        });
+
+        it('should return false if cookies are not enabled', function() {
+            spyOn(Mozilla.Cookies, 'enabled').and.returnValue(false);
+            expect(Mozilla.StubAttribution.meetsRequirements()).toBeFalsy();
         });
 
         it('should return false if platform is not windows', function() {
@@ -211,10 +217,10 @@ describe('stub-attribution.js', function() {
             /* eslint-enable camelcase */
 
             spyOn(Mozilla.StubAttribution, 'updateBouncerLinks');
-            spyOn(Mozilla.StubAttribution, 'setSessionCookie');
+            spyOn(Mozilla.StubAttribution, 'setCookie');
             Mozilla.StubAttribution.onRequestSuccess(data);
             expect(Mozilla.StubAttribution.updateBouncerLinks).toHaveBeenCalledWith(data);
-            expect(Mozilla.StubAttribution.setSessionCookie).toHaveBeenCalledWith(data);
+            expect(Mozilla.StubAttribution.setCookie).toHaveBeenCalledWith(data);
         });
     });
 
@@ -303,14 +309,14 @@ describe('stub-attribution.js', function() {
         });
     });
 
-    describe('getSessionCookie', function() {
+    describe('getCookie', function() {
 
         it('should return an object an expected', function() {
             spyOn(Mozilla.Cookies, 'getItem').and.callFake(function(id) {
                 return id === Mozilla.StubAttribution.COOKIE_CODE_ID ? 'foo' : 'bar';
             });
             /* eslint-disable camelcase */
-            expect(Mozilla.StubAttribution.getSessionCookie()).toEqual({
+            expect(Mozilla.StubAttribution.getCookie()).toEqual({
                 attribution_code: 'foo',
                 attribution_sig: 'bar'
             });
@@ -319,7 +325,7 @@ describe('stub-attribution.js', function() {
         });
     });
 
-    describe('setSessionCookie', function() {
+    describe('setCookie', function() {
 
         beforeEach(function() {
             spyOn(Mozilla.Cookies, 'setItem');
@@ -333,23 +339,23 @@ describe('stub-attribution.js', function() {
             };
             /* eslint-enable camelcase */
 
-            Mozilla.StubAttribution.setSessionCookie(data);
+            Mozilla.StubAttribution.setCookie(data);
             expect(Mozilla.Cookies.setItem.calls.count()).toEqual(2);
-            expect(Mozilla.Cookies.setItem).toHaveBeenCalledWith(Mozilla.StubAttribution.COOKIE_CODE_ID, data.attribution_code, null, '/');
-            expect(Mozilla.Cookies.setItem).toHaveBeenCalledWith(Mozilla.StubAttribution.COOKIE_SIGNATURE_ID, data.attribution_sig, null, '/');
+            expect(Mozilla.Cookies.setItem).toHaveBeenCalledWith(Mozilla.StubAttribution.COOKIE_CODE_ID, data.attribution_code, jasmine.any(String), '/');
+            expect(Mozilla.Cookies.setItem).toHaveBeenCalledWith(Mozilla.StubAttribution.COOKIE_SIGNATURE_ID, data.attribution_sig, jasmine.any(String), '/');
         });
 
         it('should not set session cookies if data is not passed', function() {
-            Mozilla.StubAttribution.setSessionCookie({});
+            Mozilla.StubAttribution.setCookie({});
             expect(Mozilla.Cookies.setItem).not.toHaveBeenCalled();
         });
     });
 
-    describe('hasSessionCookie', function() {
+    describe('hasCookie', function() {
 
         it('should return true if both session cookies exists', function() {
             spyOn(Mozilla.Cookies, 'hasItem').and.returnValue(true);
-            var result = Mozilla.StubAttribution.hasSessionCookie();
+            var result = Mozilla.StubAttribution.hasCookie();
             expect(Mozilla.Cookies.hasItem.calls.count()).toEqual(2);
             expect(Mozilla.Cookies.hasItem).toHaveBeenCalledWith(Mozilla.StubAttribution.COOKIE_CODE_ID);
             expect(Mozilla.Cookies.hasItem).toHaveBeenCalledWith(Mozilla.StubAttribution.COOKIE_SIGNATURE_ID);
@@ -360,7 +366,7 @@ describe('stub-attribution.js', function() {
             spyOn(Mozilla.Cookies, 'hasItem').and.callFake(function(id) {
                 return id === Mozilla.StubAttribution.COOKIE_CODE_ID ? true : false;
             });
-            var result = Mozilla.StubAttribution.hasSessionCookie();
+            var result = Mozilla.StubAttribution.hasCookie();
             expect(Mozilla.Cookies.hasItem.calls.count()).toEqual(2);
             expect(result).toBeFalsy();
         });
