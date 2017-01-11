@@ -64,4 +64,4 @@ docker run -v `pwd`/results:/app/results \
   -e SCREEN_RESOLUTION=${SCREEN_RESOLUTION} \
   -e MARK_EXPRESSION="${MARK_EXPRESSION}" \
   -e TESTS_PATH="${TESTS_PATH}" \
-  bedrock_integration_tests:${GIT_COMMIT}
+  bedrock_integration_tests:${GIT_COMMIT} bash -c '/app/bin/run-integration-tests.sh; cp /app/geckodriver.log /app/results'

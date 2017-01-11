@@ -17,12 +17,12 @@ def capabilities(request, capabilities):
     return capabilities
 
 
-@pytest.fixture
-def firefox_profile(firefox_profile):
-    firefox_profile.set_preference('browser.tabs.remote.autostart', False)
-    firefox_profile.set_preference('browser.tabs.remote.autostart.2', False)
-    firefox_profile.set_preference('browser.tabs.remote.force-enable', False)
-    return firefox_profile
+# @pytest.fixture
+# def firefox_profile(firefox_profile):
+#     firefox_profile.set_preference('browser.tabs.remote.autostart', False)
+#     firefox_profile.set_preference('browser.tabs.remote.autostart.2', False)
+#     firefox_profile.set_preference('browser.tabs.remote.force-enable', False)
+#     return firefox_profile
 
 
 @pytest.fixture(scope='session')
