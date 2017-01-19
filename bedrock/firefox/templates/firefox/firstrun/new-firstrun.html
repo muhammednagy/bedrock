@@ -13,17 +13,15 @@
   <div>
     <div id="scene">
       <div class="fxaccounts-container">
-        <h1 id="title">{{_('Already Using Firefox?')}}</h1>
         <div id="left-divider">
+          <h1 id="title">{{_('Already using Firefox?')}}</h1>
           <p>{{_('Sign in to your account and we’ll sync the bookmarks, passwords and other great things you’ve saved to Firefox on other devices.')}}</p>
-          <div>
-            <img alt="" src="{{ static('img/firefox/firstrun-horizon/sample.png') }}">
-          </div>
           <a href="{{ url('firefox.sync') }}">{{_('Learn more about Firefox Accounts')}}</a>
         </div>
+      <div id="firefox-logo"></div>
       <div class="fxaccounts" id="fxa-iframe-config" data-host="{{ settings.FXA_IFRAME_SRC }}" data-mozillaonline-host="{{ settings.FXA_IFRAME_SRC_MOZILLAONLINE }}">
         <iframe id="fxa" scrolling="no" data-src="{{ settings.FXA_IFRAME_SRC }}signin?utm_campaign=fxa-embedded-form&amp;utm_medium=referral&amp;utm_source=firstrun&amp;utm_content=fx-{{ version }}&amp;entrypoint=firstrun&amp;service=sync&amp;context=iframe&amp;style=chromeless&amp;haltAfterSignIn=true"></iframe>
-        <button id="skip-button">{{_('Skip This Step')}}</button>
+        <button id="skip-button">{{_('Skip this step')}}</button>
       </div>
     </div>
 
