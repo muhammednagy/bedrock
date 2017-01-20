@@ -221,6 +221,66 @@ def download_firefox(ctx, channel='release', platform='all',
 
 
 @library.global_function
+@jinja2.contextfunction
+def download_firefox_desktop_list(ctx, channel='release', dom_id=None, locale=None,
+                                  force_full_installer=False):
+    dom_id = dom_id or 'download-platform-list-%s' % (channel)
+    locale = locale or get_locale(ctx['request'])
+
+    builds = []
+
+    l_version = firefox_desktop.latest_builds(locale, channel)
+    if l_version:
+        version, platforms = l_version
+    else:
+        locale = 'en-US'
+        version, platforms = firefox_desktop.latest_builds('en-US', channel)
+
+    for plat_os, plat_os_pretty in firefox_desktop.platform_labels.iteritems():
+        os_pretty = plat_os_pretty
+
+        # Add 32-bit label for Windows and Linux builds.
+        if plat_os == 'win' or plat_os == 'winsha1':
+            os_pretty = 'Windows 32-bit'
+
+        if plat_os == 'linux':
+            os_pretty = 'Linux 32-bit'
+
+        # Firefox Nightly: The Windows stub installer is now universal,
+        # automatically detecting a 32-bit and 64-bit desktop, so the
+        # win64-specific entry can be skipped.
+        if channel == 'nightly':
+            if plat_os == 'win':
+                os_pretty = 'Windows 32/64-bit'
+            if plat_os == 'win64':
+                continue
+
+        # Fallback to en-US if this plat_os/version isn't available
+        # for the current locale
+        _locale = locale if plat_os_pretty in platforms else 'en-US'
+
+        # And generate all the info
+        download_link = firefox_desktop.get_download_url(
+            channel, version, plat_os, _locale,
+            force_direct=True,
+            force_full_installer=force_full_installer
+        )
+
+        builds.append({'os': plat_os,
+                       'os_pretty': os_pretty,
+                       'download_link': download_link})
+
+    data = {
+        'id': dom_id,
+        'builds': builds
+    }
+
+    html = render_to_string('firefox/includes/download-list.html', data,
+                            request=ctx['request'])
+    return jinja2.Markup(html)
+
+
+@library.global_function
 def firefox_url(platform, page, channel=None):
     """
     Return a product-related URL like /firefox/all/ or /mobile/beta/notes/.
