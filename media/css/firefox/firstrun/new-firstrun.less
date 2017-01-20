@@ -32,6 +32,10 @@ img {
     opacity: 0;
 }
 
+#sunrise {
+    transform: translate3d(0, 30%, 0);
+}
+
 #scene-blur {
     z-index: 4;
 }
@@ -135,8 +139,8 @@ img {
     }
 
     #sunrise {
-        transition: transform 1.5s ease-in-out .5s;
-        transform: translate3d(0, -18%, 0);
+        transition: transform 1.5s cubic-bezier(.41,.61,.54,.96) 0.5s;
+        transform: translate3d(0, 0, 0);
     }
 
     #mountains-trees, #foreground-fox, #sky {
@@ -151,7 +155,12 @@ img {
         display: none;
     }
 
-    #scene-blur, .fxaccounts-container {
+    #scene-blur {
+        transition: opacity .5s;
+        opacity: 1;
+    }
+
+   .fxaccounts-container {
         transition: opacity .3s;
         opacity: 1;
     }
@@ -159,8 +168,12 @@ img {
 
 #scene[data-sign-in=true] {
 
-    #scene-blur, .fxaccounts-container {
-        display: none;
+    .fxaccounts-container {
+       display: none;
+    }
+
+    #scene-blur {
+        opacity: 0;
     }
 
     #sunrise, #sky, #mountains-trees, #foreground-fox {
@@ -169,7 +182,7 @@ img {
     }
 
     #sunrise {
-        transform-origin: 50% 80%;
+        transform-origin: 50% 60%;
         transform: scale(16);
     }
 
