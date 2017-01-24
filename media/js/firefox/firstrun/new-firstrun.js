@@ -4,37 +4,46 @@
 
 (function (Mozilla) {
     'use strict';
-    var scene = document.getElementById('scene');
-    var skipbutton = document.getElementById('skip-button');
 
-    var onVerificationComplete = function () {
-        scene.dataset.signIn = 'true';
-        document.getElementById('sunrise').addEventListener('transitionend', function(event) {
-            if (event.propertyName === 'transform') {
-                window.setTimeout(function () {
-                    Mozilla.UITour.showNewTab();
-                }, 200);
+    var animateSunrise = function () {
+        var scene = document.getElementById('scene');
+        var skipbutton = document.getElementById('skip-button');
+
+        var onVerificationComplete = function () {
+            scene.dataset.signIn = 'true';
+            document.getElementById('sunrise').addEventListener('transitionend', function(event) {
+                if (event.propertyName === 'transform') {
+                    window.setTimeout(function () {
+                        Mozilla.UITour.showNewTab();
+                    }, 200);
+                }
+            }, false);
+        };
+
+        skipbutton.onclick = onVerificationComplete;
+
+        Mozilla.Client.getFirefoxDetails(function(data) {
+            Mozilla.FxaIframe.init({
+                distribution: data.distribution,
+                gaEventName: 'firstrun-fxa',
+                onVerificationComplete: onVerificationComplete,
+                onLogin: onVerificationComplete
+            });
+        });
+
+        scene.dataset.sunrise = 'true';
+
+        document.getElementById('sky').addEventListener('transitionend', function(event) {
+            if (event.propertyName === 'opacity') {
+                scene.dataset.modal = 'true';
             }
         }, false);
-    };
+    }
 
-    skipbutton.onclick = onVerificationComplete;
-
-    Mozilla.Client.getFirefoxDetails(function(data) {
-        Mozilla.FxaIframe.init({
-            distribution: data.distribution,
-            gaEventName: 'firstrun-fxa',
-            onVerificationComplete: onVerificationComplete,
-            onLogin: onVerificationComplete
-        });
-    });
-
-    scene.dataset.sunrise = 'true';
-
-    document.getElementById('sky').addEventListener('transitionend', function(event) {
-        if (event.propertyName === 'opacity') {
-            scene.dataset.modal = 'true';
+    document.onreadystatechange = function () {
+        if (document.readyState === "complete") {
+            animateSunrise();
         }
-    }, false);
+    }
 
 })(window.Mozilla);
